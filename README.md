@@ -1,6 +1,5 @@
 # Testcontainers DynamoDB
 
-
 ```bash
 npm i -D @tapendium/testcontainers-dynamodb
 ```
@@ -29,4 +28,3 @@ describe('receive PwaRouteConfigCreated message', () => {
   });
 });
 ```
-
