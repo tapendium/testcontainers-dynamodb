@@ -4,6 +4,8 @@
 npm i -D @tapendium/testcontainers-dynamodb
 ```
 
+- Example
+
 ```ts
 describe('receive PwaRouteConfigCreated message', () => {
   let startedContainer: StartedDynamoDBContainer;
