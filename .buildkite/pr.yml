@@ -15,6 +15,8 @@ tapendium-aliases:
           bucket: tap-buildkite-cache
         paths:
           - node_modules
+        pipeline-slug-override: testcontainers-dynamodb
+    - tapendium/tap-ci-utils#v0.3.1: ~
     - tapendium/asdf#v1.0.0: ~
 
 steps:
@@ -29,7 +31,7 @@ steps:
               image: 'cytopia/yamllint:latest'
 
       - label: ':npm: npm install'
-        commands: npm ci
+        commands: install-npm-packages
         plugins: *lib-common
 
       - wait

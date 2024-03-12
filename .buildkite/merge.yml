@@ -17,6 +17,16 @@ steps:
         npm publish
       # yamllint enable rule:line-length
     plugins:
+      - nienbo/cache#v2.4.15:
+          id: testcontainers-dynamodb
+          key: >
+            "v3-cache-{{ id }}-{{ runner.os }}-{{ checksum 'package-lock.json' }}"
+          backend: s3
+          s3:
+            bucket: tap-buildkite-cache
+          paths:
+            - node_modules
+          pipeline-slug-override: testcontainers-dynamodb
       - tapendium/1password-secrets#v2.3.0:
           file:
             - path: .npmrc-publish.tpl
