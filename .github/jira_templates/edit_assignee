@@ -1,0 +1,26 @@
+{{/* edit template */ -}}
+# issue: {{ .key }} - created: {{ .fields.created | age}} ago
+update:
+  comment:
+    - add:
+        body: |~
+          {{ or .overrides.comment "" | indent 10 }}
+fields:
+{{- if .meta.fields.assignee }}
+  {{- if .overrides.assignee }}
+  assignee:
+    emailAddress: {{ .overrides.assignee }}
+  {{- else if .fields.assignee }}
+  assignee: {{if .fields.assignee.name}}
+    emailAddress: {{ or .fields.assignee.name}}
+  {{- else }}
+    emailAddress: {{.fields.assignee.emailAddress}}{{end}}{{end}}{{end}}
+{{- if .meta.fields.customfield_10050 }}
+  # reviewer
+  {{- if .overrides.reviewer }}
+  customfield_10050:
+    emailAddress: {{ .overrides.reviewer }}
+  {{- else if .fields.customfield_10050 }}
+  customfield_10050:
+    emailAddress: {{ .fields.customfield_10050.emailAddress}}{{end}}{{end}}
+

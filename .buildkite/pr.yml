@@ -1,0 +1,49 @@
+tapendium-aliases:
+  lib-common: &lib-common
+    - seek-oss/github-merged-pr#v1.1.2:
+        mode: checkout
+    - tapendium/1password-secrets#v2.3.0:
+        file:
+          - path: .npmrc.tpl
+            out: .npmrc
+    - nienbo/cache#v2.4.15:
+        id: testcontainers-dynamodb
+        key: >
+          "v3-cache-{{ id }}-{{ runner.os }}-{{ checksum 'package-lock.json' }}"
+        backend: s3
+        s3:
+          bucket: tap-buildkite-cache
+        paths:
+          - node_modules
+        pipeline-slug-override: testcontainers-dynamodb
+    - tapendium/tap-ci-utils#v0.3.1: ~
+    - tapendium/asdf#v1.0.0: ~
+
+steps:
+  - group: ':lint-roller: Lint'
+    steps:
+      - label: ':yaml: YAML Lint'
+        plugins:
+          - seek-oss/github-merged-pr#v1.1.2:
+              mode: checkout
+          - docker#v5.7.0:
+              command: ['.']
+              image: 'cytopia/yamllint:latest'
+
+      - label: ':npm: npm install'
+        commands: install-npm-packages
+        plugins: *lib-common
+
+      - wait
+
+      - label: ':prettier: Check formatting'
+        commands: npm run format:check
+        plugins: *lib-common
+
+      - label: ':typescript: Run type check'
+        commands: npm run typecheck
+        plugins: *lib-common
+
+      - label: ':vitest: Run unit tests'
+        commands: npm test
+        plugins: *lib-common

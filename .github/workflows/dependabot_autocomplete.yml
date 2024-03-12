@@ -1,0 +1,140 @@
+name: Dependabot Auto-complete
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+env:
+  JIRA_BASE_URL: https://benieworldwide.atlassian.net
+  JIRA_USER_EMAIL: github@tapendium.com
+  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+  JIRA_PROJECT: LIBS
+  JIRA_ISSUE_TYPE: Dependency Update
+  TPL_SRC: .github/jira_templates
+  TPL_DEST: .jira.d/templates
+
+jobs:
+  auto-cancel:
+    name: Dependabot Automatic PR Cancellation
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.merged == false &&
+      github.actor == 'tapendium-flow'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get Jira Ticket ID
+        uses: nick-fields/retry@v2
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ github.token }}
+        with:
+          timeout_seconds: 30
+          max_attempts: 5
+          command: |
+            TITLE=$(gh pr view --json title "$PR_URL" | cut -d "\"" -f4)
+            ISSUE=$(echo "${TITLE}" | cut -d "[" -f2 | cut -d "]" -f1)
+            if [[ "${TITLE}" == "${ISSUE}" ]]
+            then
+              exit 1111
+            fi
+            echo "issue_id=${ISSUE}" >> "$GITHUB_ENV"
+          retry_wait_seconds: 10
+          retry_on: error
+
+      - name: Verify Jira Ticket ID Access
+        run: |
+          echo "${{ env.issue_id }}"
+
+      - name: Login to Jira
+        uses: atlassian/gajira-login@v2.0.0
+        env:
+          JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ env.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Set-up Jira CLI
+        uses: atlassian/gajira-cli@v3
+
+      - name: Create Jira Ticket Editor Template
+        run: |
+          mkdir -p "${HOME}/${TPL_DEST}"
+          cp "${GITHUB_WORKSPACE}/${TPL_SRC}/edit_assignee" \
+            "${HOME}/${TPL_DEST}/edit"
+
+      - name: Update Jira Ticket Reviewer and Assignee
+        run: |
+          OVERRIDE_R="reviewer=${{ env.JIRA_USER_EMAIL }}"
+          OVERRIDE_A="assignee=${{ env.JIRA_USER_EMAIL }}"
+          jira edit -o "${OVERRIDE_R}" -o "${OVERRIDE_A}" \
+            --noedit ${{ env.issue_id }}
+
+      - name: Cancel Ticket
+        run: |
+          jira transition "Rejected/Cancelled" \
+            --noedit ${{ env.issue_id }}
+
+  auto-complete:
+    name: Dependabot Automatic PR Completion
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.merged == true &&
+      github.actor == 'tapendium-flow'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get Jira Ticket ID
+        uses: nick-fields/retry@v2
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ github.token }}
+        with:
+          timeout_seconds: 30
+          max_attempts: 5
+          command: |
+            TITLE=$(gh pr view --json title "$PR_URL" | cut -d "\"" -f4)
+            ISSUE=$(echo "${TITLE}" | cut -d "[" -f2 | cut -d "]" -f1)
+            if [[ "${TITLE}" == "${ISSUE}" ]]
+            then
+              exit 1111
+            fi
+            echo "issue_id=${ISSUE}" >> "$GITHUB_ENV"
+          retry_wait_seconds: 10
+          retry_on: error
+
+      - name: Verify Jira Ticket ID Access
+        run: |
+          echo "${{ env.issue_id }}"
+
+      - name: Login to Jira
+        uses: atlassian/gajira-login@v2.0.0
+        env:
+          JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ env.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Set-up Jira CLI
+        uses: atlassian/gajira-cli@v3
+
+      - name: Create Jira Ticket Editor Template
+        run: |
+          mkdir -p "${HOME}/${TPL_DEST}"
+          cp "${GITHUB_WORKSPACE}/${TPL_SRC}/edit_assignee" \
+            "${HOME}/${TPL_DEST}/edit"
+
+      - name: Update Jira Ticket Reviewer and Assignee
+        run: |
+          OVERRIDE_R="reviewer=${{ env.JIRA_USER_EMAIL }}"
+          OVERRIDE_A="assignee=${{ env.JIRA_USER_EMAIL }}"
+          jira edit -o "${OVERRIDE_R}" -o "${OVERRIDE_A}" \
+            --noedit ${{ env.issue_id }}
+
+      - name: Complete Ticket
+        run: |
+          jira transition "Approved and merged" \
+            --noedit ${{ env.issue_id }}

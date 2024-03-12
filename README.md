@@ -1,9 +1,10 @@
 # Testcontainers DynamoDB
 
-
 ```bash
 npm i -D @tapendium/testcontainers-dynamodb
 ```
+
+- Example
 
 ```ts
 describe('receive PwaRouteConfigCreated message', () => {
@@ -29,4 +30,3 @@ describe('receive PwaRouteConfigCreated message', () => {
   });
 });
 ```
-

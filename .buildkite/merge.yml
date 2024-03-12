@@ -1,0 +1,36 @@
+steps:
+  - label: ':npm: Publish package to NPM registry'
+    branches: main
+    commands:
+      # Only publish new version if local and registry versions are different
+      # This doesn't validate local version - only that it is different
+      # from registry version
+      # yamllint disable rule:line-length
+      - |
+        localVersion="$(jq '.version' -r < package.json)"
+        remoteVersion="$(npm view @tapendium/testcontainers-dynamodb version 2>/dev/null || echo NOT_FOUND)"
+        echo "local version: \${localVersion}, registry version: \${remoteVersion}"
+        if [ "\${localVersion}" = "\${remoteVersion}" ]; then
+          echo "Version \${localVersion} is already published."
+          exit 0;
+        fi
+        npm publish
+      # yamllint enable rule:line-length
+    plugins:
+      - nienbo/cache#v2.4.15:
+          id: testcontainers-dynamodb
+          # yamllint disable rule:line-length
+          key: >
+            "v3-cache-{{ id }}-{{ runner.os }}-{{ checksum 'package-lock.json' }}"
+          # yamllint enable rule:line-length
+          backend: s3
+          s3:
+            bucket: tap-buildkite-cache
+          paths:
+            - node_modules
+          pipeline-slug-override: testcontainers-dynamodb
+      - tapendium/1password-secrets#v2.3.0:
+          file:
+            - path: .npmrc-publish.tpl
+              out: .npmrc
+      - tapendium/asdf#v1.0.0: ~

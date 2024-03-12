@@ -1,0 +1,75 @@
+name: PR Branch Updater
+
+on:
+  workflow_dispatch: ~
+  push:
+    branches:
+      - main
+
+env:
+  # When this label is applied to the PR skip update
+  SKIP_UPDATE_LABEL: skipupdate
+
+jobs:
+  list_prs:
+    name: List open PRs
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.pr_numbers.outputs.value }}
+    steps:
+      - name: List open PRs
+        uses: octokit/request-action@v2.x
+        id: list_open_prs
+        with:
+          route: GET /repos/{owner}/{repo}/pulls
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPO }}
+
+      - name: Write out PR list
+        uses: DamianReeves/write-file-action@master
+        with:
+          path: pullrequests.json
+          contents: ${{ steps.list_open_prs.outputs.data }}
+          write-mode: overwrite
+
+      - name: Get PR numbers
+        id: pr_numbers
+        uses: sergeysova/jq-action@v2
+        with:
+          cmd: jq --compact-output '[.[] | .number]' pullrequests.json
+          multiline: true
+
+  update_prs:
+    needs: list_prs
+    if: needs.list_prs.outputs.matrix != '[]'
+    name: Update open PR branches
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        number: ${{ fromJSON(needs.list_prs.outputs.matrix) }}
+    steps:
+      - name: Fetch PR Labels
+        uses: octokit/request-action@v2.x
+        id: get_pr_labels
+        with:
+          route: GET /repos/{owner}/{repo}/issues/{pull_number}/labels
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          pull_number: ${{ matrix.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPO }}
+
+      - name: Update PR branch
+        uses: octokit/request-action@v2.x
+        id: update_pr_branch
+        # yamllint disable-line rule:line-length
+        if: '!contains(fromJSON(steps.get_pr_labels.outputs.data).*.name, env.SKIP_UPDATE_LABEL)'
+        with:
+          route: PUT /repos/{owner}/{repo}/pulls/{pull_number}/update-branch
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          pull_number: ${{ matrix.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPO }}
