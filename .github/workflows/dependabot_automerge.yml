@@ -1,0 +1,89 @@
+name: Dependabot Auto-merge
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+    branches:
+      - main
+
+env:
+  JIRA_BASE_URL: https://benieworldwide.atlassian.net
+  JIRA_USER_EMAIL: github@tapendium.com
+  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+  JIRA_PROJECT: LIBS
+  JIRA_ISSUE_TYPE: Dependency Update
+  TPL_SRC: .github/jira_templates
+  TPL_DEST: .jira.d/templates
+
+jobs:
+  auto-approve:
+    name: Dependabot Automatic PR Processing
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+      - name: Get Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v1.1.1
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Auto-approve Pull Request
+        uses: hmarr/auto-approve-action@v3
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Get Jira Ticket ID
+        uses: nick-fields/retry@v2
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ github.token }}
+        with:
+          timeout_seconds: 30
+          max_attempts: 5
+          command: |
+            TITLE=$(gh pr view --json title "$PR_URL" | cut -d "\"" -f4)
+            ISSUE=$(echo "${TITLE}" | cut -d "[" -f2 | cut -d "]" -f1)
+            if [[ "${TITLE}" == "${ISSUE}" ]]
+            then
+              exit 1111
+            fi
+            echo "issue_id=${ISSUE}" >> "$GITHUB_ENV"
+          retry_wait_seconds: 10
+          retry_on: error
+
+      - name: Verify Jira Ticket ID Access
+        run: |
+          echo "${{ env.issue_id }}"
+
+      - name: Login to Jira
+        uses: atlassian/gajira-login@v2.0.0
+        env:
+          JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ env.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Set-up Jira CLI
+        uses: atlassian/gajira-cli@v3
+
+      - name: Create Jira Ticket Editor Template
+        run: |
+          mkdir -p "${HOME}/${TPL_DEST}"
+          cp "${GITHUB_WORKSPACE}/${TPL_SRC}/edit_reviewer" \
+            "${HOME}/${TPL_DEST}/edit"
+
+      - name: Update Jira Ticket Reviewer
+        run: |
+          OVERRIDE="reviewer=${{ env.JIRA_USER_EMAIL }}"
+          jira edit -o "${OVERRIDE}" --noedit ${{ env.issue_id }}
+
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GH_MERGE_TOKEN }}

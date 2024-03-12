@@ -1,0 +1,54 @@
+name: Dependabot Create Jira Ticket
+
+on:
+  pull_request:
+    types:
+      - opened
+    branches:
+      - main
+
+env:
+  JIRA_BASE_URL: https://benieworldwide.atlassian.net
+  JIRA_USER_EMAIL: github@tapendium.com
+  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+  JIRA_PROJECT: LIBS
+  JIRA_ISSUE_TYPE: Dependency Update
+
+jobs:
+  create_jira:
+    name: Dependabot Jira
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+      - name: Get Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v1.1.1
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Login to Jira
+        uses: atlassian/gajira-login@v2.0.0
+        env:
+          JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
+          JIRA_USER_EMAIL: ${{ env.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+
+      - name: Create Jira Issue
+        id: create
+        uses: atlassian/gajira-create@v2.0.1
+        with:
+          project: ${{ env.JIRA_PROJECT }}
+          issuetype: ${{ env.JIRA_ISSUE_TYPE }}
+          summary: >-
+            [${{github.event.repository.name}}]
+            ${{github.event.pull_request.title}}
+          description: |
+            ${{github.event.pull_request.html_url }}
+
+      - name: Update PR Title
+        id: updatepr
+        uses: tzkhan/pr-update-action@v2
+        with:
+          repo-token: '${{ secrets.GH_TOKEN_REPO }}'
+          title-template: '[${{ steps.create.outputs.issue }}]'
+          base-branch-regex: '^main$'
