@@ -1,7 +1,6 @@
 {
   "name": "@tapendium/testcontainers-dynamodb",
   "version": "0.0.2",
-  "main": "src/index.ts",
   "author": "Tapendium",
   "main": "dist/index",
   "types": "src/index",
@@ -27,6 +26,7 @@
     "url": "git+https://github.com/tapendium/testcontainers-dynamodb.git"
   },
   "keywords": [
+    "testing",
     "testcontainers",
     "dynamodb"
   ],
