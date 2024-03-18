@@ -47,3 +47,22 @@ steps:
       - label: ':vitest: Run unit tests'
         commands: npm test
         plugins: *lib-common
+
+      - label: ':typescript: Buildl'
+        commands: npm run build
+        plugins:
+          - nienbo/cache#v2.4.15:
+              id: testcontainers-dynamodb
+              key: >
+                "v3-cache-{{ id }}-{{ runner.os }}-{{ checksum 'package-lock.json' }}"
+              backend: s3
+              s3:
+                bucket: tap-buildkite-cache
+              paths:
+                - node_modules
+              pipeline-slug-override: testcontainers-dynamodb
+          - tapendium/tap-ci-utils#v0.3.1: ~
+          - tapendium/asdf#v1.0.0: ~
+          - tapendium/tap-build-artifact#v1.1.0:
+              type: upload
+              artifacts-path: 'dist/**'

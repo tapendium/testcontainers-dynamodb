@@ -17,6 +17,9 @@ steps:
         npm publish
       # yamllint enable rule:line-length
     plugins:
+      - tapendium/tap-build-artifact#v1.1.0:
+          type: download
+          artifacts-path: 'dist/**'
       - nienbo/cache#v2.4.15:
           id: testcontainers-dynamodb
           # yamllint disable rule:line-length
