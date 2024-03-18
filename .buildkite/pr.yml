@@ -53,8 +53,10 @@ steps:
         plugins:
           - nienbo/cache#v2.4.15:
               id: testcontainers-dynamodb
+              # yamllint disable rule:line-length
               key: >
                 "v3-cache-{{ id }}-{{ runner.os }}-{{ checksum 'package-lock.json' }}"
+              # yamllint enable rule:line-length
               backend: s3
               s3:
                 bucket: tap-buildkite-cache
