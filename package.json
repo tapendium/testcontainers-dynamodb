@@ -27,6 +27,7 @@
     "url": "git+https://github.com/tapendium/testcontainers-dynamodb.git"
   },
   "keywords": [
+    "testing",
     "testcontainers",
     "dynamodb"
   ],
