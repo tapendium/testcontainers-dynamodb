@@ -1,4 +1,3 @@
-import { join } from 'path';
 import { readFileSync } from 'node:fs';
 import { load } from 'js-yaml';
 
@@ -35,9 +34,7 @@ export const getCreateTableInputFromCloudformation = (
   options: GetCreateTableInputFromCloudformationOptions
 ) => {
   const { pathToDbInfra, tableResourceName } = options;
-  const PROJECT_PATH = process.cwd();
-  const fullPath = join(PROJECT_PATH, pathToDbInfra);
-  const payload = readFileSync(fullPath, 'utf8');
+  const payload = readFileSync(pathToDbInfra, 'utf8');
   const config = load(payload);
 
   if (!isCloudformationResource(config)) {
