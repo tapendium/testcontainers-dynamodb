@@ -15,15 +15,20 @@ type CFResource = {
   >;
 };
 
-function isCloudformationResource(config: unknown): config is CFResource {
+function isCloudformationResource(
+  config: any,
+  tableResourceName: string
+): config is CFResource {
   if (
     config &&
     typeof config === 'object' &&
     'Resources' in config &&
     config.Resources &&
     typeof config.Resources === 'object' &&
-    'Properties' in config.Resources &&
-    typeof config.Resources.Properties === 'object'
+    tableResourceName in config.Resources &&
+    typeof config.Resources[tableResourceName] === 'object' &&
+    'Properties' in config.Resources[tableResourceName] &&
+    typeof config.Resources[tableResourceName].Properties === 'object'
   ) {
     return true;
   }
@@ -37,7 +42,7 @@ export const getCreateTableInputFromCloudformation = (
   const payload = readFileSync(pathToDbInfra, 'utf8');
   const config = load(payload);
 
-  if (!isCloudformationResource(config)) {
+  if (!isCloudformationResource(config, tableResourceName)) {
     throw new Error('Invalid schema');
   }
   const createTableInput = config.Resources?.[tableResourceName]?.Properties;
