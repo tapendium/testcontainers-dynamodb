@@ -1,6 +1,6 @@
 {
   "name": "@tapendium/testcontainers-dynamodb",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Tapendium",
   "main": "dist/index",
   "types": "src/index",
@@ -31,9 +31,9 @@
     "dynamodb"
   ],
   "peerDependencies": {
-    "@aws-sdk/client-dynamodb": "^3.576.0",
-    "@aws-sdk/lib-dynamodb": "^3.576.0",
-    "@aws-sdk/util-dynamodb": "^3.576.0"
+    "@aws-sdk/client-dynamodb": "^3.596.0",
+    "@aws-sdk/lib-dynamodb": "^3.596.0",
+    "@aws-sdk/util-dynamodb": "^3.596.0"
   },
   "devDependencies": {
     "@tapendium/prettier-config-apollo": "^0.0.1",
