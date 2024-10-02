@@ -191,13 +191,24 @@ export interface TableInitStructure {
   items?: Array<object>;
 }
 
+export interface DynamoDBContainerOptions {
+  /** Should container be used */
+  reuse?: boolean;
+}
+
 export class DynamoDBContainer extends GenericContainer {
   private static readonly IMAGE_NAME = 'amazon/dynamodb-local';
   public static readonly MAPPED_PORT = 8000;
 
-  constructor(private readonly initStructure: Array<TableInitStructure> = []) {
+  constructor(
+    private readonly initStructure: Array<TableInitStructure> = [],
+    { reuse }: DynamoDBContainerOptions = {}
+  ) {
     super(DynamoDBContainer.IMAGE_NAME);
     this.withExposedPorts(DynamoDBContainer.MAPPED_PORT);
+    if (reuse) {
+      this.withReuse();
+    }
   }
 
   async start(): Promise<StartedDynamoDBContainer> {
