@@ -23,12 +23,20 @@ import {
   FileToCopy,
   Labels,
 } from 'testcontainers/build/types';
+import { tableName } from './utils';
 
 export class StartedDynamoDBContainer implements StartedTestContainer {
+  private tables: string[] = [];
+
   constructor(
     private readonly startedContainer: StartedTestContainer,
     private readonly initData: Array<TableInitStructure>
   ) {}
+
+  /** Test table names creatd */
+  get tableNames() {
+    return this.tables;
+  }
 
   restart(options?: Partial<RestartOptions>): Promise<void> {
     return this.startedContainer.restart(options);
@@ -176,6 +184,79 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     }
   }
 
+  /**
+   * Create a new test dynamodb table with specified table properties and
+   * optionally seed with provided data
+   */
+  async createTable(
+    tableProperties: Pick<
+      CreateTableCommandInput,
+      'AttributeDefinitions' | 'KeySchema'
+    > &
+      Partial<
+        Pick<CreateTableCommandInput, 'TableName' | 'GlobalSecondaryIndexes'>
+      >,
+    seedData?: Record<string, unknown> | Record<string, unknown>[]
+  ) {
+    const client = this.createDocumentClient();
+    const { TableName, ...restTableProperties } = tableProperties ?? {};
+    const name = tableName(TableName);
+    await client.send(
+      new CreateTableCommand({
+        TableName: name,
+        BillingMode: 'PAY_PER_REQUEST',
+        ...restTableProperties,
+      })
+    );
+    this.tables.push(name);
+
+    if (seedData) {
+      await this.seedTable(name, seedData);
+    }
+
+    return name;
+  }
+
+  /**
+   * Seed table with specified data
+   * @param tableName Table to be seeded
+   * @param item(s) Single or more items to be inserted into table
+   */
+  async seedTable(
+    tableName: string,
+    items: Record<string, unknown>[] | Record<string, unknown>
+  ) {
+    const documentClient = this.createDocumentClient();
+    const data = Array.isArray(items) ? items : [items];
+
+    const putBatches = this.chunkArray(
+      data.map((item) => ({ PutRequest: { Item: item } })),
+      25
+    ).map((chunk) =>
+      documentClient.send(
+        new BatchWriteCommand({
+          RequestItems: {
+            [tableName]: chunk,
+          },
+        })
+      )
+    );
+    await Promise.allSettled(putBatches);
+  }
+
+  async deleteTable(name: string, documentClient?: DynamoDBDocumentClient) {
+    const client = documentClient ?? this.createDocumentClient();
+    await client.send(new DeleteTableCommand({ TableName: name }));
+    this.tables = this.tables.filter((tableName) => tableName !== name);
+  }
+
+  async deleteAllTables() {
+    const client = this.createDocumentClient();
+    return Promise.allSettled(
+      this.tables.map((table) => this.deleteTable(table, client))
+    );
+  }
+
   private chunkArray<A>(array: Array<A>, size: number): Array<Array<A>> {
     let result: any[] = [];
     for (let i = 0; i < array.length; i += size) {
@@ -194,17 +275,22 @@ export interface TableInitStructure {
 export interface DynamoDBContainerOptions {
   /** Should container be used */
   reuse?: boolean;
+
+  /** Reset data */
+  reset?: boolean;
 }
 
 export class DynamoDBContainer extends GenericContainer {
   private static readonly IMAGE_NAME = 'amazon/dynamodb-local';
   public static readonly MAPPED_PORT = 8000;
+  private shouldResetData: boolean;
 
   constructor(
     private readonly initStructure: Array<TableInitStructure> = [],
-    { reuse }: DynamoDBContainerOptions = {}
+    { reuse, reset = true }: DynamoDBContainerOptions = {}
   ) {
     super(DynamoDBContainer.IMAGE_NAME);
+    this.shouldResetData = reset;
     this.withExposedPorts(DynamoDBContainer.MAPPED_PORT);
     if (reuse) {
       this.withReuse();
@@ -216,7 +302,10 @@ export class DynamoDBContainer extends GenericContainer {
       await super.start(),
       this.initStructure
     );
-    await startedContainer.resetData();
+
+    if (this.shouldResetData) {
+      await startedContainer.resetData();
+    }
 
     return startedContainer;
   }
