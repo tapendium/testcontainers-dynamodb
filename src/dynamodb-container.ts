@@ -33,7 +33,7 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     private readonly initData: Array<TableInitStructure>
   ) {}
 
-  /** Test table names creatd */
+  /** Test table names created */
   get tableNames() {
     return this.tables;
   }
