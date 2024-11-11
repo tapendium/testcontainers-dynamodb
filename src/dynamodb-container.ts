@@ -24,6 +24,11 @@ import {
   Labels,
 } from 'testcontainers/build/types';
 import { tableName } from './utils';
+import { Table } from 'dynamodb-toolbox';
+import {
+  getCreateTableInputFromDdbtoolboxTable,
+  isDdbToolboxTable,
+} from './get-create-table-input-from-ddbtoolbox-table';
 
 export class StartedDynamoDBContainer implements StartedTestContainer {
   private tables: string[] = [];
@@ -189,17 +194,25 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
    * optionally seed with provided data
    */
   async createTable(
-    tableProperties: Pick<
-      CreateTableCommandInput,
-      'AttributeDefinitions' | 'KeySchema'
-    > &
-      Partial<
-        Pick<CreateTableCommandInput, 'TableName' | 'GlobalSecondaryIndexes'>
-      >,
+    tableProperties:
+      | (Pick<CreateTableCommandInput, 'AttributeDefinitions' | 'KeySchema'> &
+          Partial<
+            Pick<
+              CreateTableCommandInput,
+              'TableName' | 'GlobalSecondaryIndexes'
+            >
+          >)
+      | Table,
     seedData?: Record<string, unknown> | Record<string, unknown>[]
   ) {
     const client = this.createDocumentClient();
-    const { TableName, ...restTableProperties } = tableProperties ?? {};
+
+    const { TableName, ...restTableProperties } = isDdbToolboxTable(
+      tableProperties
+    )
+      ? getCreateTableInputFromDdbtoolboxTable(tableProperties)
+      : tableProperties ?? {};
+
     const name = tableName(TableName);
     await client.send(
       new CreateTableCommand({

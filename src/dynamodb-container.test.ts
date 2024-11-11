@@ -13,6 +13,7 @@ import {
 } from './dynamodb-container';
 import { ListTablesCommand, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
+import { Table } from 'dynamodb-toolbox';
 
 const initDataTest = [
   {
@@ -159,6 +160,17 @@ describe('DynamoDB container with reuse', () => {
     const table2 = await reusedContainer.createTable(tableDef as any);
     const table3 = await reusedContainer.createTable(tableDef as any);
     expect(reusedContainer.tableNames).toEqual([table1, table2, table3]);
+  });
+
+  it('can create a table using a ddb toolbox schema', async () => {
+    const tableDef = new Table({
+      name: 'ddbtoolbox',
+      partitionKey: { type: 'string', name: 'pk' },
+      sortKey: { type: 'string', name: 'sk' },
+    });
+    const table = await reusedContainer.createTable(tableDef);
+    expect(table).toBeDefined();
+    expect(reusedContainer.tableNames).toContain(table);
   });
 
   afterAll(async () => {
