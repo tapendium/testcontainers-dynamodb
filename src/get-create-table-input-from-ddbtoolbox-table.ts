@@ -4,7 +4,7 @@ import {
   GlobalSecondaryIndex,
   KeySchemaElement,
 } from '@aws-sdk/client-dynamodb';
-import { Table, attr } from 'dynamodb-toolbox';
+import { Table } from 'dynamodb-toolbox';
 import { IndexableKeyType } from 'dynamodb-toolbox/dist/esm/table';
 import { Key } from 'dynamodb-toolbox/dist/esm/table/types';
 
