@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getCreateTableInputFromDdbtoolboxTable } from './get-create-table-input-from-ddbtoolbox-table';
 import { Table } from 'dynamodb-toolbox';
-import { getCreateTableInputFromCloudformation } from './get-create-table-input-from-cloudformation';
 
 describe('get create table input from ddb toolbox table', () => {
   it('produces the correct properties for a basic setup', () => {
