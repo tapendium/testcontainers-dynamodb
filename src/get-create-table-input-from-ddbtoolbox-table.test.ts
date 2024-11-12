@@ -14,7 +14,6 @@ describe('get create table input from ddb toolbox table', () => {
       getCreateTableInputFromDdbtoolboxTable(tableDef);
     expect(createTableProperties).toEqual({
       TableName: 'test',
-      BillingMode: 'PAY_PER_REQUEST',
       KeySchema: [
         {
           AttributeName: 'pk',
@@ -49,7 +48,6 @@ describe('get create table input from ddb toolbox table', () => {
       getCreateTableInputFromDdbtoolboxTable(tableDef);
     expect(createTableProperties).toEqual({
       TableName: 'test',
-      BillingMode: 'PAY_PER_REQUEST',
       KeySchema: [
         {
           AttributeName: 'pk',
@@ -76,6 +74,45 @@ describe('get create table input from ddb toolbox table', () => {
           Projection: { ProjectionType: 'ALL' },
         },
       ],
+    });
+  });
+
+  it('deduplicates attribute definitions when necessary', () => {
+    const tableDef = new Table({
+      name: 'testtable',
+      partitionKey: { type: 'string', name: 'pk' },
+      sortKey: { type: 'string', name: 'usedtwice' },
+      indexes: {
+        gsi1: {
+          type: 'global',
+          partitionKey: { type: 'string', name: 'email' },
+          sortKey: { type: 'string', name: 'usedtwice' },
+        },
+      },
+    });
+    const createTableProperties =
+      getCreateTableInputFromDdbtoolboxTable(tableDef);
+    expect(createTableProperties).toEqual({
+      AttributeDefinitions: [
+        { AttributeName: 'pk', AttributeType: 'S' },
+        { AttributeName: 'usedtwice', AttributeType: 'S' },
+        { AttributeName: 'email', AttributeType: 'S' },
+      ],
+      GlobalSecondaryIndexes: [
+        {
+          IndexName: 'gsi1',
+          KeySchema: [
+            { AttributeName: 'email', KeyType: 'HASH' },
+            { AttributeName: 'usedtwice', KeyType: 'RANGE' },
+          ],
+          Projection: { ProjectionType: 'ALL' },
+        },
+      ],
+      KeySchema: [
+        { AttributeName: 'pk', KeyType: 'HASH' },
+        { AttributeName: 'usedtwice', KeyType: 'RANGE' },
+      ],
+      TableName: 'testtable',
     });
   });
 });

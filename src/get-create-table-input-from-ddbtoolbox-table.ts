@@ -45,15 +45,23 @@ const getCreateTableInputFromDdbtoolboxTable = <T extends Table>(
     });
   }
 
+  const dedupedAttrs = attributeDefinitions.filter(
+    (firstAttr, index, arr) =>
+      arr.findIndex(
+        (secondAttr) =>
+          firstAttr.AttributeName === secondAttr.AttributeName &&
+          firstAttr.AttributeType === secondAttr.AttributeType
+      ) == index
+  );
+
   return {
     TableName: tableName
       ? typeof tableName === 'function'
         ? tableName()
         : tableName
       : undefined,
-    BillingMode: 'PAY_PER_REQUEST',
     KeySchema: keySchema,
-    AttributeDefinitions: attributeDefinitions,
+    AttributeDefinitions: dedupedAttrs,
     ...(gsis.length ? { GlobalSecondaryIndexes: gsis } : {}),
   };
 };
