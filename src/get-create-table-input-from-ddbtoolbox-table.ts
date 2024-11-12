@@ -4,7 +4,7 @@ import {
   GlobalSecondaryIndex,
   KeySchemaElement,
 } from '@aws-sdk/client-dynamodb';
-import { Table } from 'dynamodb-toolbox';
+import { Table, attr } from 'dynamodb-toolbox';
 import { IndexableKeyType } from 'dynamodb-toolbox/dist/esm/table';
 import { Key } from 'dynamodb-toolbox/dist/esm/table/types';
 
@@ -45,15 +45,23 @@ const getCreateTableInputFromDdbtoolboxTable = <T extends Table>(
     });
   }
 
+  const dedupedAttrs = attributeDefinitions.filter(
+    (firstAttr, index, arr) =>
+      arr.findIndex(
+        (secondAttr) =>
+          firstAttr.AttributeName === secondAttr.AttributeName &&
+          firstAttr.AttributeType === secondAttr.AttributeType
+      ) == index
+  );
+
   return {
     TableName: tableName
       ? typeof tableName === 'function'
         ? tableName()
         : tableName
       : undefined,
-    BillingMode: 'PAY_PER_REQUEST',
     KeySchema: keySchema,
-    AttributeDefinitions: attributeDefinitions,
+    AttributeDefinitions: dedupedAttrs,
     ...(gsis.length ? { GlobalSecondaryIndexes: gsis } : {}),
   };
 };
