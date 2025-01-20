@@ -211,7 +211,7 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
       tableProperties
     )
       ? getCreateTableInputFromDdbtoolboxTable(tableProperties)
-      : tableProperties ?? {};
+      : (tableProperties ?? {});
 
     const name = tableName(TableName);
     await client.send(
