@@ -18,6 +18,7 @@ import {
 } from 'testcontainers';
 import { ExecResult } from 'testcontainers/build/index';
 import {
+  CommitOptions,
   ContentToCopy,
   DirectoryToCopy,
   FileToCopy,
@@ -37,6 +38,9 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     private readonly startedContainer: StartedTestContainer,
     private readonly initData: Array<TableInitStructure>
   ) {}
+  commit(options: CommitOptions): Promise<string> {
+    return this.commit(options);
+  }
 
   getHostname(): string {
     return this.getHostname();
@@ -132,10 +136,7 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     return {
       endpoint: this.endpointUrl(),
       region: 'local',
-      credentials: {
-        accessKeyId: 'dummy',
-        secretAccessKey: 'dummy',
-      },
+      credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' },
     };
   }
 
@@ -182,11 +183,7 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
 
         for (const requests of this.chunkArray(putRequests, 25)) {
           await documentClient.send(
-            new BatchWriteCommand({
-              RequestItems: {
-                [tableName]: requests,
-              },
-            })
+            new BatchWriteCommand({ RequestItems: { [tableName]: requests } })
           );
         }
       }
@@ -251,11 +248,7 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
       25
     ).map((chunk) =>
       documentClient.send(
-        new BatchWriteCommand({
-          RequestItems: {
-            [tableName]: chunk,
-          },
-        })
+        new BatchWriteCommand({ RequestItems: { [tableName]: chunk } })
       )
     );
     await Promise.allSettled(putBatches);
