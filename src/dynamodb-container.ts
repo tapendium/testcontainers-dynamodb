@@ -30,6 +30,7 @@ import {
   getCreateTableInputFromDdbtoolboxTable,
   isDdbToolboxTable,
 } from './get-create-table-input-from-ddbtoolbox-table';
+import { Readable } from 'stream';
 
 export class StartedDynamoDBContainer implements StartedTestContainer {
   private tables: string[] = [];
@@ -38,6 +39,9 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     private readonly startedContainer: StartedTestContainer,
     private readonly initData: Array<TableInitStructure>
   ) {}
+  copyArchiveToContainer(tar: Readable, target?: string): Promise<void> {
+    return this.startedContainer.copyArchiveToContainer(tar, target);
+  }
   commit(options: CommitOptions): Promise<string> {
     return this.commit(options);
   }
