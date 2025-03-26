@@ -25,7 +25,7 @@ describe('get create table input from ddb toolbox table', () => {
     });
   });
 
-  it.skip('produces the correct properties when includes indexes', () => {
+  it('produces the correct properties when includes indexes', () => {
     const tableDef = new Table({
       name: () => 'test',
       partitionKey: { type: 'string', name: 'pk' },
@@ -71,7 +71,7 @@ describe('get create table input from ddb toolbox table', () => {
     });
   });
 
-  it.skip('deduplicates attribute definitions when necessary', () => {
+  it('deduplicates attribute definitions when necessary', () => {
     const tableDef = new Table({
       name: 'testtable',
       partitionKey: { type: 'string', name: 'pk' },
