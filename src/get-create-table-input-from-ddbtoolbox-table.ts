@@ -9,6 +9,18 @@ import { IndexableKeyType } from 'dynamodb-toolbox/dist/esm/table';
 import { Key } from 'dynamodb-toolbox/dist/esm/table/types';
 
 /**
+ * Get table name from ddb toolbox Table definition
+ *
+ */
+const getTableName = (tableDef: Table) => {
+  // @ts-expect-error v1/v2 expose table name as different properties
+  const { tableName, name } = tableDef;
+  const namev2 = typeof tableName === 'function' ? tableName() : tableName;
+  const namev1 = typeof name === 'function' ? name() : name;
+  return namev2 ?? namev1;
+};
+
+/**
  * Convert DynamoDB Toolbox table definition into equivalent input to CreateTableInput
  *
  * @param tableDef - DynamoDB toolbox table definition
@@ -16,7 +28,8 @@ import { Key } from 'dynamodb-toolbox/dist/esm/table/types';
 const getCreateTableInputFromDdbtoolboxTable = <T extends Table>(
   tableDef: T
 ): CreateTableInput => {
-  const { partitionKey, sortKey, indexes, name: tableName } = tableDef;
+  const { partitionKey, sortKey, indexes } = tableDef;
+  const tableName = getTableName(tableDef);
   if (!partitionKey) {
     throw new Error('partitionKey must be defined');
   }
@@ -55,11 +68,7 @@ const getCreateTableInputFromDdbtoolboxTable = <T extends Table>(
   );
 
   return {
-    TableName: tableName
-      ? typeof tableName === 'function'
-        ? tableName()
-        : tableName
-      : undefined,
+    TableName: tableName,
     KeySchema: keySchema,
     AttributeDefinitions: dedupedAttrs,
     ...(gsis.length ? { GlobalSecondaryIndexes: gsis } : {}),
