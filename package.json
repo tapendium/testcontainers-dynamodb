@@ -14,8 +14,8 @@
     "format": "prettier --ignore-unknown --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "validate": "run-p --continue-on-error --print-name format:check typecheck",
-    "test": "vitest --run"
+    "validate": "CI=true run-p --continue-on-error --print-name format:check typecheck test",
+    "test": "vitest"
   },
   "homepage": "https://github.com/tapendium/testcontainers-dynamodb#readme",
   "publishConfig": {
@@ -34,13 +34,13 @@
     "@aws-sdk/client-dynamodb": ">=3",
     "@aws-sdk/lib-dynamodb": ">=3",
     "@aws-sdk/util-dynamodb": ">=3",
+    "dynamodb-toolbox": ">= 1.14.5",
     "testcontainers": ">=10"
   },
   "devDependencies": {
     "@tapendium/prettier-config-apollo": "^0.0.1",
     "@tsconfig/recommended": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
-    "dynamodb-toolbox": "^1.16.3",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",

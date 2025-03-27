@@ -39,11 +39,13 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     private readonly startedContainer: StartedTestContainer,
     private readonly initData: Array<TableInitStructure>
   ) {}
+
   copyArchiveToContainer(tar: Readable, target?: string): Promise<void> {
     return this.startedContainer.copyArchiveToContainer(tar, target);
   }
+
   commit(options: CommitOptions): Promise<string> {
-    return this.commit(options);
+    return this.startedContainer.commit(options);
   }
 
   getHostname(): string {

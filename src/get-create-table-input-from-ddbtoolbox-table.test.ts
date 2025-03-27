@@ -4,25 +4,19 @@ import { Table } from 'dynamodb-toolbox';
 
 describe('get create table input from ddb toolbox table', () => {
   it('produces the correct properties for a basic setup', () => {
-    const tableDef = {
+    const tableDef = new Table({
       name: 'test',
       partitionKey: { type: 'string', name: 'pk' },
       sortKey: { type: 'string', name: 'sk' },
-    } as unknown as Table;
+    });
 
     const createTableProperties =
       getCreateTableInputFromDdbtoolboxTable(tableDef);
     expect(createTableProperties).toEqual({
       TableName: 'test',
       KeySchema: [
-        {
-          AttributeName: 'pk',
-          KeyType: 'HASH',
-        },
-        {
-          AttributeName: 'sk',
-          KeyType: 'RANGE',
-        },
+        { AttributeName: 'pk', KeyType: 'HASH' },
+        { AttributeName: 'sk', KeyType: 'RANGE' },
       ],
       AttributeDefinitions: [
         { AttributeName: 'pk', AttributeType: 'S' },
@@ -32,7 +26,7 @@ describe('get create table input from ddb toolbox table', () => {
   });
 
   it('produces the correct properties when includes indexes', () => {
-    const tableDef = {
+    const tableDef = new Table({
       name: () => 'test',
       partitionKey: { type: 'string', name: 'pk' },
       sortKey: { type: 'string', name: 'sk' },
@@ -43,7 +37,7 @@ describe('get create table input from ddb toolbox table', () => {
           sortKey: { type: 'number', name: 'idx1sk' },
         },
       },
-    } as unknown as Table;
+    });
     const createTableProperties =
       getCreateTableInputFromDdbtoolboxTable(tableDef);
     expect(createTableProperties).toEqual({
