@@ -132,6 +132,11 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     return this.startedContainer.stop(options);
   }
 
+  // Required for compatibility with StartedTestContainer...
+  [Symbol.asyncDispose] = async () => {
+    await this.stop();
+  };
+
   endpointUrl(): string {
     return `http://localhost:${this.getMappedPort(
       DynamoDBContainer.MAPPED_PORT
