@@ -35,7 +35,7 @@
     "@aws-sdk/lib-dynamodb": ">=3",
     "@aws-sdk/util-dynamodb": ">=3",
     "dynamodb-toolbox": ">= 1.14.5",
-    "testcontainers": "^11.4.0"
+    "testcontainers": ">=10"
   },
   "devDependencies": {
     "@tapendium/prettier-config-apollo": "^0.0.1",
