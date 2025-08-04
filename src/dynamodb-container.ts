@@ -116,8 +116,11 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     return this.startedContainer.getId();
   }
 
-  getMappedPort(port: number): number {
-    return this.startedContainer.getMappedPort(port);
+  getMappedPort(
+    portOrProtocol: number | `${number}/${'tcp' | 'udp'}`,
+    protocol?: string
+  ): number {
+    return this.startedContainer.getMappedPort(portOrProtocol as any, protocol);
   }
 
   getName(): string {
