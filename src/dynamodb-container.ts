@@ -128,6 +128,7 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
       // @ts-expect-error - testcontainers typing does not support two args
       return this.startedContainer.getMappedPort(port, protocol);
     }
+    // @ts-expect-error - testcontainers typing does not support two args
     return this.startedContainer.getMappedPort(port);
   }
 
