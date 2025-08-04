@@ -120,7 +120,11 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     portOrProtocol: number | `${number}/${'tcp' | 'udp'}`,
     protocol?: string
   ): number {
-    return this.startedContainer.getMappedPort(portOrProtocol as any, protocol);
+    if (typeof portOrProtocol === 'string') {
+      return this.startedContainer.getMappedPort(portOrProtocol);
+    } else {
+      return this.startedContainer.getMappedPort(portOrProtocol, protocol);
+    }
   }
 
   getName(): string {
