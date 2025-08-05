@@ -123,8 +123,10 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     protocol?: string
   ): number {
     if (typeof port === 'number') {
+      // @ts-expect-error - testcontainers typing does not support two args
       return this.startedContainer.getMappedPort(port, protocol);
     }
+    // @ts-expect-error - testcontainers typing does not support two args
     return this.startedContainer.getMappedPort(port);
   }
 
