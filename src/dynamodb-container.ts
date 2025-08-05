@@ -116,7 +116,17 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
     return this.startedContainer.getId();
   }
 
-  getMappedPort(port: number): number {
+  getMappedPort(port: number, protocol?: string): number;
+  getMappedPort(portWithProtocol: `${number}/${'tcp' | 'udp'}`): number;
+  getMappedPort(
+    port: number | `${number}/${'tcp' | 'udp'}`,
+    protocol?: string
+  ): number {
+    if (typeof port === 'number') {
+      // @ts-expect-error - testcontainers typing does not support two args
+      return this.startedContainer.getMappedPort(port, protocol);
+    }
+    // @ts-expect-error - testcontainers typing does not support two args
     return this.startedContainer.getMappedPort(port);
   }
 
