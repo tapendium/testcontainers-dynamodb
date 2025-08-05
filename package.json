@@ -1,9 +1,10 @@
 {
   "name": "@tapendium/testcontainers-dynamodb",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "Tapendium",
   "main": "dist/index",
   "types": "src/index",
+  "type": "module",
   "files": [
     "dist",
     "src"
@@ -35,7 +36,7 @@
     "@aws-sdk/lib-dynamodb": ">=3",
     "@aws-sdk/util-dynamodb": ">=3",
     "dynamodb-toolbox": ">= 1.14.5",
-    "testcontainers": ">=10"
+    "testcontainers": ">=11"
   },
   "devDependencies": {
     "@tapendium/prettier-config-apollo": "^0.0.1",
@@ -45,7 +46,7 @@
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
     "typescript": "^5.7.3",
-    "vitest": "^3.0.2"
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@types/js-yaml": "^4.0.9",
