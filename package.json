@@ -4,6 +4,7 @@
   "author": "Tapendium",
   "main": "dist/index",
   "types": "src/index",
+  "type": "module",
   "files": [
     "dist",
     "src"
