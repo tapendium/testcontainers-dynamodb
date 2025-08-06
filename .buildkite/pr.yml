@@ -18,7 +18,7 @@ tapendium-aliases:
         pipeline-slug-override: testcontainers-dynamodb
     - tapendium/tap-ci-utils#v0.3.1: ~
     - tapendium/asdf#v1.0.0: ~
-  
+
   common: &common
     - &merge-main
       seek-oss/github-merged-pr#v1.1.2:
@@ -76,9 +76,8 @@ steps:
       - label: ':vitest: Run unit tests'
         commands: npm test
         plugins: *lib-common
-      
+
       - label: ':lint-roller: [testcontainers-dynamodb] Run validation'
         commands:
           - publish-npm-package -r -n
         plugins: *common
-
