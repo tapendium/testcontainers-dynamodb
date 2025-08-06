@@ -1,6 +1,6 @@
 {
   "name": "@tapendium/testcontainers-dynamodb",
-  "version": "1.0.0",
+  "version": "0.2.3",
   "author": "Tapendium",
   "type": "module",
   "files": [
