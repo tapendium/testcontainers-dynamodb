@@ -16,7 +16,7 @@ tapendium-aliases:
         paths:
           - node_modules
         pipeline-slug-override: testcontainers-dynamodb
-    - tapendium/tap-ci-utils#v0.3.1: ~
+    - tapendium/tap-ci-utils#v0.10.1: ~
     - tapendium/asdf#v1.0.0: ~
 
   common: &common
