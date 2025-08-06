@@ -79,5 +79,5 @@ steps:
 
       - label: ':lint-roller: [testcontainers-dynamodb] Run validation'
         commands:
-          - publish-npm-package -r -n
+          - publish-npm-package -r
         plugins: *common
