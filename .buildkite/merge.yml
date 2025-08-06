@@ -1,3 +1,5 @@
+tapendium-aliases: ~
+
 steps:
   - label: ':npm: Publish package to NPM registry'
     branches: main
@@ -17,23 +19,23 @@ steps:
         npm publish
       # yamllint enable rule:line-length
     plugins:
-      - tapendium/tap-build-artifact#v1.1.0:
-          type: download
-          artifacts-path: 'dist/**'
-      - nienbo/cache#v2.4.15:
-          id: testcontainers-dynamodb
-          # yamllint disable rule:line-length
-          key: >
-            "v3-cache-{{ id }}-{{ runner.os }}-{{ checksum 'package-lock.json' }}"
-          # yamllint enable rule:line-length
-          backend: s3
-          s3:
-            bucket: tap-buildkite-cache
-          paths:
-            - node_modules
-          pipeline-slug-override: testcontainers-dynamodb
+      - tapendium/tap-ci-utils#v0.10.1:
+          setup:
+            working_dir: .
+
       - tapendium/1password-secrets#v2.3.0:
           file:
             - path: .npmrc-publish.tpl
               out: .npmrc
-      - tapendium/asdf#v1.0.0: ~
+
+      - nienbo/cache#v2.4.15:
+          id: testcontainers-dynamodb
+          key: >
+            "v1-{{id}}-{{runner.os}}-{{checksum 'package-lock.json'}}"
+          backend: s3
+          s3:
+            bucket: tap-buildkite-cache
+            save-cache: true
+          paths:
+            - node_modules
+          pipeline-slug-override: testcontainers-dynamodb
