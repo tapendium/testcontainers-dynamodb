@@ -21,34 +21,6 @@ tapendium-aliases:
           working_dir: .
     - tapendium/asdf#v1.0.0: ~
 
-  common: &common
-    - &merge-main
-      seek-oss/github-merged-pr#v1.1.2:
-        mode: checkout
-
-    - &setup-tools
-      tapendium/tap-ci-utils#v0.10.1:
-        setup:
-          working_dir: .
-
-    - &secret-npm
-      tapendium/1password-secrets#v2.3.0:
-        file:
-          - path: .npmrc.tpl
-            out: .npmrc
-
-    - &npm-cache
-      nienbo/cache#v2.4.15:
-        id: testcontainers-dynamodb
-        key: >
-          "v3-cache-{{ id }}-{{ runner.os }}-{{ checksum 'package-lock.json' }}"
-        backend: s3
-        s3:
-          bucket: tap-buildkite-cache
-        paths:
-          - node_modules
-        pipeline-slug-override: testcontainers-dynamodb
-
 steps:
   - group: ':lint-roller: Lint'
     steps:
@@ -77,8 +49,3 @@ steps:
       - label: ':vitest: Run unit tests'
         commands: npm test
         plugins: *lib-common
-
-      - label: ':lint-roller: [testcontainers-dynamodb] Run validation'
-        commands:
-          - publish-npm-package -r -n
-        plugins: *common

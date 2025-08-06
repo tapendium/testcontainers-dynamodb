@@ -1,32 +1,41 @@
-tapendium-aliases:
-  common: &common
-    - &setup-tools
-      tapendium/tap-ci-utils#v0.10.1:
-        setup:
-          working_dir: .
-
-    - &secret-npm
-      tapendium/1password-secrets#v2.3.0:
-        file:
-          - path: .npmrc-publish.tpl
-            out: .npmrc
-
-    - &npm-cache
-      nienbo/cache#v2.4.15:
-        id: testcontainers-dynamodb
-        key: >
-          "v1-{{id}}-{{runner.os}}-{{checksum 'package-lock.json'}}"
-        backend: s3
-        s3:
-          bucket: tap-buildkite-cache
-          save-cache: true
-        paths:
-          - node_modules
-        pipeline-slug-override: testcontainers-dynamodb
+tapendium-aliases: ~
 
 steps:
   - label: ':npm: Publish package to NPM registry'
     branches: main
-    plugins: *common
     commands:
-      - publish-npm-package -r
+      # Only publish new version if local and registry versions are different
+      # This doesn't validate local version - only that it is different
+      # from registry version
+      # yamllint disable rule:line-length
+      - |
+        localVersion="$(jq '.version' -r < package.json)"
+        remoteVersion="$(npm view @tapendium/testcontainers-dynamodb version 2>/dev/null || echo NOT_FOUND)"
+        echo "local version: \${localVersion}, registry version: \${remoteVersion}"
+        if [ "\${localVersion}" = "\${remoteVersion}" ]; then
+          echo "Version \${localVersion} is already published."
+          exit 0;
+        fi
+        npm publish
+      # yamllint enable rule:line-length
+    plugins:
+      - tapendium/tap-ci-utils#v0.10.1:
+          setup:
+            working_dir: .
+
+      - tapendium/1password-secrets#v2.3.0:
+          file:
+            - path: .npmrc-publish.tpl
+              out: .npmrc
+
+      - nienbo/cache#v2.4.15:
+          id: testcontainers-dynamodb
+          key: >
+            "v1-{{id}}-{{runner.os}}-{{checksum 'package-lock.json'}}"
+          backend: s3
+          s3:
+            bucket: tap-buildkite-cache
+            save-cache: true
+          paths:
+            - node_modules
+          pipeline-slug-override: testcontainers-dynamodb
