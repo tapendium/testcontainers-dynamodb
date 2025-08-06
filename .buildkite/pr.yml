@@ -39,11 +39,10 @@ tapendium-aliases:
       nienbo/cache#v2.4.15:
         id: testcontainers-dynamodb
         key: >
-          "v1-{{id}}-{{runner.os}}-{{checksum 'package-lock.json'}}"
+          "v3-cache-{{ id }}-{{ runner.os }}-{{ checksum 'package-lock.json' }}"
         backend: s3
         s3:
           bucket: tap-buildkite-cache
-          save-cache: true
         paths:
           - node_modules
         pipeline-slug-override: testcontainers-dynamodb
