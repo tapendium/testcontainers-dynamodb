@@ -5,7 +5,7 @@ import {
   KeySchemaElement,
 } from '@aws-sdk/client-dynamodb';
 import { Table } from 'dynamodb-toolbox';
-import { IndexableKeyType } from 'dynamodb-toolbox/dist/esm/table';
+import { KeyType } from 'dynamodb-toolbox/dist/esm/table';
 import { Key } from 'dynamodb-toolbox/dist/esm/table/types';
 
 /**
@@ -92,8 +92,8 @@ const getPartitionAndSortKeys = ({
   partitionKey,
   sortKey,
 }: {
-  partitionKey?: Key<string, IndexableKeyType>;
-  sortKey?: Key<string, IndexableKeyType>;
+  partitionKey?: Key<string, KeyType>;
+  sortKey?: Key<string, KeyType>;
 }) => {
   if (!partitionKey) {
     throw new Error('partitionKey must be defined');

@@ -31,7 +31,7 @@
     "@aws-sdk/client-dynamodb": ">=3",
     "@aws-sdk/lib-dynamodb": ">=3",
     "@aws-sdk/util-dynamodb": ">=3",
-    "dynamodb-toolbox": ">= 1.14.5",
+    "dynamodb-toolbox": ">=2.8.0",
     "testcontainers": ">=11"
   },
   "devDependencies": {
