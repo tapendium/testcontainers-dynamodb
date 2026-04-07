@@ -1,6 +1,6 @@
 {
   "name": "@tapendium/testcontainers-dynamodb",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Tapendium",
   "type": "module",
   "main": "src/index.ts",

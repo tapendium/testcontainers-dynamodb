@@ -109,6 +109,9 @@ export class StartedDynamoDBContainer implements StartedTestContainer {
 
   getContainerIpAddress(): string {
     const networkName = this.startedContainer.getNetworkNames()[0];
+    if (!networkName) {
+      throw new Error('networkName must be defined');
+    }
     return this.startedContainer.getIpAddress(networkName);
   }
 
