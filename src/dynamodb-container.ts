@@ -16,20 +16,20 @@ import {
   StopOptions,
   StoppedTestContainer,
 } from 'testcontainers';
-import { ExecResult } from 'testcontainers/build/index';
+import { ExecResult } from 'testcontainers/build/index.js';
 import {
   CommitOptions,
   ContentToCopy,
   DirectoryToCopy,
   FileToCopy,
   Labels,
-} from 'testcontainers/build/types';
-import { tableName } from './utils';
+} from 'testcontainers/build/types.js';
+import { tableName } from './utils.js';
 import { Table } from 'dynamodb-toolbox';
 import {
   getCreateTableInputFromDdbtoolboxTable,
   isDdbToolboxTable,
-} from './get-create-table-input-from-ddbtoolbox-table';
+} from './get-create-table-input-from-ddbtoolbox-table.js';
 import { Readable } from 'stream';
 
 export class StartedDynamoDBContainer implements StartedTestContainer {

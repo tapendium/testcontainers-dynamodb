@@ -5,8 +5,7 @@ import {
   KeySchemaElement,
 } from '@aws-sdk/client-dynamodb';
 import { Table } from 'dynamodb-toolbox';
-import { KeyType } from 'dynamodb-toolbox/dist/esm/table';
-import { Key } from 'dynamodb-toolbox/dist/esm/table/types';
+import type { Key, KeyType } from 'dynamodb-toolbox/table';
 
 /**
  * Get table name from ddb toolbox Table definition
