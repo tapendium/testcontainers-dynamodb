@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tableName } from './utils';
+import { tableName } from './utils.js';
 
 describe('random table name util', () => {
   it('generates a random name when no base name is passed in', () => {

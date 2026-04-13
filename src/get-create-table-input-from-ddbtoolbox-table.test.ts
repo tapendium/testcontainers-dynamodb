@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getCreateTableInputFromDdbtoolboxTable } from './get-create-table-input-from-ddbtoolbox-table';
+import { getCreateTableInputFromDdbtoolboxTable } from './get-create-table-input-from-ddbtoolbox-table.js';
 import { Table } from 'dynamodb-toolbox';
 
 describe('get create table input from ddb toolbox table', () => {
